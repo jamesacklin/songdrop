@@ -1,0 +1,43 @@
+services:
+  slskd:
+    image: slskd/slskd:latest
+    container_name: slskd
+    restart: unless-stopped
+    ports:
+      - "5030:5030"      # web UI / API
+      - "50300:50300"    # Soulseek listen port
+    environment:
+      - SLSKD_REMOTE_CONFIGURATION=true
+    volumes:
+      - ./data/slskd:/app
+      - ./data/downloads:/downloads
+
+  songdrop:
+    build: ./server
+    container_name: songdrop
+    restart: unless-stopped
+    ports:
+      - "8585:8585"
+    environment:
+      SLSKD_URL: http://slskd:5030
+      # Auth: set an API key, OR a username/password pair.
+      SLSKD_API_KEY: ${SLSKD_API_KEY:-}
+      SLSKD_USERNAME: ${SLSKD_USERNAME:-}
+      SLSKD_PASSWORD: ${SLSKD_PASSWORD:-}
+      SLSKD_DOWNLOADS_DIR: /downloads
+      MUSIC_LIBRARY_DIR: /music
+      # If Plex sees the same music folder at a different path, set it here:
+      # PLEX_LIBRARY_DIR: /data/music
+      PLEX_URL: ${PLEX_URL:-}
+      PLEX_TOKEN: ${PLEX_TOKEN:-}
+      PLEX_SECTION: ${PLEX_SECTION:-}
+      SONGDROP_API_KEY: ${SONGDROP_API_KEY:?set in .env}
+      NTFY_URL: ${NTFY_URL:-}
+      DATABASE_PATH: /data/songdrop.db
+    volumes:
+      - ./data/downloads:/downloads
+      - ./data/songdrop:/data
+      # Point this at your actual Plex music library folder:
+      - ${MUSIC_LIBRARY_PATH:?set in .env}:/music
+    depends_on:
+      - slskd

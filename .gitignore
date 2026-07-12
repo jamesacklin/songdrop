@@ -1,0 +1,12 @@
+.env
+data/
+*.db
+__pycache__/
+*.pyc
+.venv/
+
+# Xcode / XcodeGen output
+ios/Songdrop.xcodeproj/
+ios/Songdrop/Info.plist
+xcuserdata/
+DerivedData/
