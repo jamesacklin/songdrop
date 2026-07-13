@@ -22,7 +22,7 @@ struct SearchView: View {
                         ContentUnavailableView {
                             Label("No matches", systemImage: "magnifyingglass")
                         } description: {
-                            Text("We couldn't find this one in the metadata catalog. You can still send a request to your server by entering the artist and title yourself.")
+                            Text("Neither Deezer nor iTunes lists this one — but Soulseek might. Request it manually with the exact artist and title.")
                         } actions: {
                             Button("Request Manually") { showManualSheet = true }
                                 .buttonStyle(.borderedProminent)

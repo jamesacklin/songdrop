@@ -141,21 +141,19 @@ class Worker:
         Soulseek (best candidate), otherwise the YouTube fallback."""
         rid = req["id"]
 
-        # User-facing `detail`/`error` text is kept content-neutral (it surfaces
-        # in the client UI); operator logs below stay specific for debugging.
         if req.get("youtube_url"):
-            self.db.update(rid, status="downloading", detail="fetching from your link")
+            self.db.update(rid, status="downloading", detail="downloading from YouTube link")
             try:
                 path = await ytdl.download_url(req["youtube_url"])
             except Exception as e:
-                log.warning("request %s: direct-link fetch failed: %s", rid, e)
+                log.warning("request %s: YouTube link download failed: %s", rid, e)
                 # A specific link failing (removed/region-locked) won't heal on retry.
-                raise PipelineError("couldn't fetch from that link") from e
+                raise PipelineError(f"YouTube download failed: {e}") from e
             if path is None:
-                raise PipelineError("couldn't fetch from that link")
+                raise PipelineError("YouTube download produced no file")
             return path
 
-        self.db.update(rid, status="searching", detail="searching your sources")
+        self.db.update(rid, status="searching", detail="searching Soulseek")
         query = f"{req['artist']} {req['title']}"
         # Resolve the client ONCE so a mid-pipeline config change can't make us
         # enqueue on one slskd and then poll a different one.
@@ -163,27 +161,24 @@ class Worker:
         try:
             responses = await slskd.search(query, timeout=settings.search_timeout)
         except NET_ERRORS as e:
-            log.warning("request %s: source search failed: %s", rid, e)
-            raise PipelineError("source search failed", retryable=True) from e
+            raise PipelineError(f"slskd search failed: {e}", retryable=True) from e
 
         candidates = rank_candidates(responses, req["artist"], req["title"])
         if not candidates:
-            return await self._alt_source_fallback(req, "no match on primary source", ui="no match yet")
+            return await self._youtube_fallback(req, "not on Soulseek", ui="not on Soulseek — trying YouTube")
         log.info("request %s: %d candidate(s), best score %.0f", rid, len(candidates), candidates[0]["score"])
 
-        last_error = "couldn't retrieve this track"
+        last_error = "download failed"
         for i, cand in enumerate(candidates[: settings.max_candidates]):
             self.db.update(
                 rid,
                 status="downloading",
-                detail=f"downloading (source {i + 1})",
+                detail=f"downloading from {cand['username']} (attempt {i + 1})",
             )
-            log.info("request %s: trying %s / %s", rid, cand["username"], cand["filename"])
             try:
                 await slskd.enqueue(cand["username"], cand["filename"], cand["size"])
             except NET_ERRORS as e:
-                last_error = "couldn't retrieve this track"
-                log.warning("request %s: enqueue failed: %s", rid, e)
+                last_error = f"enqueue failed: {e}"
                 continue
 
             try:
@@ -192,32 +187,32 @@ class Worker:
                 )
                 if "Succeeded" not in state:
                     await slskd.cancel(cand["username"], cand["filename"])
-                    last_error = "couldn't retrieve this track"
-                    log.warning("request %s: transfer ended in state %s", rid, state)
+                    last_error = f"download from {cand['username']} ended in state {state}"
                     continue
             except NET_ERRORS as e:
-                last_error = "lost contact with source"
-                log.warning("request %s: lost contact during download: %s", rid, e)
+                last_error = f"lost contact with slskd during download: {e}"
                 continue
 
             local = find_downloaded_file(
                 settings.slskd_downloads_dir, cand["filename"], cand["size"]
             )
             if local is None:
-                last_error = "retrieval finished but the file wasn't found (check server volume mapping)"
-                log.warning("request %s: file not found under %s", rid, settings.slskd_downloads_dir)
+                last_error = (
+                    "download completed but file not found in "
+                    f"{settings.slskd_downloads_dir} (check volume mapping)"
+                )
                 continue
             return local
-        # Candidates existed but every attempt failed; try the alternate source
-        # before giving up (peers may also be back later, so this stays retryable).
-        return await self._alt_source_fallback(req, last_error, ui="trying an alternate source")
+        # Candidates existed but every attempt failed; try YouTube before giving
+        # up (peers may also be back later, so this stays retryable).
+        return await self._youtube_fallback(req, last_error, ui="Soulseek attempts failed — trying YouTube")
 
-    async def _alt_source_fallback(self, req: dict, reason: str, ui: str = "trying an alternate source") -> str:
+    async def _youtube_fallback(self, req: dict, reason: str, ui: str = "trying YouTube") -> str:
         if not settings.ytdlp_enabled:
             raise PipelineError(reason, retryable=True)
         rid = req["id"]
         self.db.update(rid, status="downloading", detail=ui)
-        log.info("request %s: %s; trying alternate (yt-dlp) source", rid, reason)
+        log.info("request %s: %s; trying YouTube fallback", rid, reason)
         duration_hint = None
         if req.get("deezer_id"):
             with contextlib.suppress(Exception):
@@ -226,11 +221,11 @@ class Worker:
         try:
             path = await ytdl.search_and_download(req["artist"], req["title"], duration_hint)
         except Exception as e:
-            log.warning("request %s: alternate source errored: %s", rid, e)
+            log.warning("request %s: YouTube fallback errored: %s", rid, e)
             path = None
         if path is None:
-            raise PipelineError("no match found on your sources", retryable=True)
-        self.db.update(rid, detail="added from an alternate source (~128 kbps)")
+            raise PipelineError(f"{reason}; YouTube had no good match either", retryable=True)
+        self.db.update(rid, detail="downloaded from YouTube (~128kbps AAC)")
         return path
 
     async def build_meta(self, req: dict) -> TrackMeta:

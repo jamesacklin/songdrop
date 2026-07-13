@@ -79,15 +79,15 @@ struct SettingsView: View {
         } header: {
             Text("Songdrop Server")
         } footer: {
-            Text("The base URL of your Songdrop server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home. Once connected, your server's music source and Plex library are configured below — no server restart needed.")
+            Text("The base URL of your Songdrop server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home. Once connected, slskd and Plex are configured below — no server restart needed.")
         }
     }
 
-    // MARK: Music source (server-side acquisition backend)
+    // MARK: slskd (Soulseek)
 
     private var slskdSection: some View {
         Section {
-            TextField("Source address (http://…)", text: $slskdUrl)
+            TextField("http://slskd:5030", text: $slskdUrl)
                 .keyboardType(.URL)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
@@ -95,21 +95,21 @@ struct SettingsView: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
             SecureField("Password", text: $slskdPassword)
-            SecureField("Access key (optional, used instead of login)", text: $slskdApiKey)
+            SecureField("API key (optional, used instead of login)", text: $slskdApiKey)
 
-            saveButton(isSaving: isSavingSlskd, title: "Save & Test Source") {
+            saveButton(isSaving: isSavingSlskd, title: "Save & Test slskd") {
                 Task { await saveSlskd() }
             }
             if let status = serverStatus {
-                StatusRow(name: "Music source", ok: status.slskd.ok, detail: status.slskd.detail)
+                StatusRow(name: "slskd", ok: status.slskd.ok, detail: status.slskd.detail)
             }
             if let slskdError {
                 Text(slskdError).font(.caption).foregroundStyle(.red)
             }
         } header: {
-            Text("Music Source")
+            Text("slskd (Soulseek)")
         } footer: {
-            Text("The service your server uses to locate music. The address is from the server's point of view — on the same host, \"http://host.docker.internal:5030\" usually works.")
+            Text("Where downloads come from. The URL is from the server's point of view — on the same Docker host, \"http://host.docker.internal:5030\" usually works.")
         }
     }
 

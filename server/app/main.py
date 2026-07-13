@@ -51,9 +51,10 @@ async def health() -> dict:
 async def _probe_slskd() -> dict:
     try:
         state = str((await clients.get_slskd().app_state()).get("server", {}).get("state", "unknown"))
-        connected = "Connected" in state and "LoggedIn" in state
-        # Content-neutral text for the client UI; the raw state is in the logs.
-        return {"ok": connected, "detail": "connected" if connected else state}
+        return {
+            "ok": "Connected" in state and "LoggedIn" in state,
+            "detail": f"Soulseek: {state}",
+        }
     except Exception as e:
         return {"ok": False, "detail": f"unreachable: {e}"}
 

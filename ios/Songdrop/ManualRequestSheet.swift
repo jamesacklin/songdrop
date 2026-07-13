@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Freeform request for tracks the metadata catalog doesn't list — obscure
-/// remixes, CD-only tracks. Sends the details to your server to locate.
+/// Freeform request for tracks no metadata catalog lists — obscure remixes,
+/// CD-only tracks. Goes straight to the Soulseek search on your server.
 struct ManualRequestSheet: View {
     var prefillTitle: String = ""
     var onAdded: () -> Void
@@ -32,17 +32,17 @@ struct ManualRequestSheet: View {
                     TextField("Album (optional)", text: $album)
                         .textInputAutocapitalization(.words)
                 } footer: {
-                    Text("Your server matches on the artist and exact title — include qualifiers like “(Indifferent Remix)” if you want a specific version. Album is used for tagging and the folder name.")
+                    Text("The Soulseek search uses the artist and exact title — include qualifiers like “(Indifferent Remix)” if you want a specific version. Album is used for tagging and the folder name.")
                 }
 
                 Section {
-                    TextField("Direct source link (optional)", text: $youtubeURL)
+                    TextField("YouTube URL (optional)", text: $youtubeURL)
                         .keyboardType(.URL)
                         .textContentType(.URL)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                 } footer: {
-                    Text("If your server supports fetching from a specific web link, paste it here to point at an exact source. Leave empty to let your server locate the track.")
+                    Text("Paste a YouTube link to grab audio from that exact video, skipping the Soulseek search. Otherwise YouTube is only used automatically when Soulseek comes up empty.")
                 }
 
                 Section("Playlist (optional)") {

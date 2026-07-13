@@ -18,7 +18,7 @@ struct RequestsView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if let status = serverStatus, !status.slskd.ok {
-                    SourceOfflineBanner(detail: status.slskd.detail)
+                    SlskdDownBanner(detail: status.slskd.detail)
                 }
                 content
             }
@@ -203,14 +203,14 @@ struct RequestsView: View {
     }
 }
 
-struct SourceOfflineBanner: View {
+struct SlskdDownBanner: View {
     let detail: String?
 
     var body: some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Your server's source is offline").font(.subheadline).bold()
-                Text(detail ?? "Requests will wait until it's back.")
+                Text("slskd is unreachable").font(.subheadline).bold()
+                Text(detail ?? "Requests will keep retrying until it's back.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
