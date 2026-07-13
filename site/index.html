@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Songdrop</title>
+<meta name="description" content="Song-first requests for a music library you host yourself.">
+</head>
+<body style="margin:0;">
+<style>
+  /* A deliberately plain document: Times, black on white, centered.
+     Single fixed white world by design — no theming, no color, no chrome. */
+  .sd * { box-sizing: border-box; }
+  .sd {
+    background: #ffffff;
+    color: #000000;
+    color-scheme: only light;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 19px;
+    line-height: 1.5;
+    min-height: 100vh;
+    margin: 0;
+    padding: 56px 22px 72px;
+    text-align: center;
+  }
+  .sd .wrap { max-width: 600px; margin: 0 auto; }
+
+  .sd a { color: #000000; text-decoration: underline; text-underline-offset: 2px; }
+
+  .sd .icon { width: 72px; height: 72px; display: block; margin: 0 auto 22px; }
+
+  .sd h1 {
+    font-size: 2.9rem; font-weight: normal; margin: 0 0 18px;
+    letter-spacing: .01em;
+  }
+  .sd .sub { font-size: 1.2rem; margin: 0 auto; max-width: none; }
+
+  .sd hr {
+    border: 0; border-top: 1px solid #000; width: 100%;
+    margin: 44px auto;
+  }
+
+  .sd h2 { font-size: 1.5rem; font-weight: normal; margin: 0 0 12px; }
+  .sd p { margin: 0 auto 14px; max-width: 46ch; }
+  .sd p:last-child { margin-bottom: 0; }
+
+  .sd pre {
+    display: block; width: fit-content; max-width: 100%;
+    margin: 20px auto 0; padding: 14px 18px;
+    text-align: left; overflow-x: auto;
+    border: 1px solid #000;
+    font-family: "Courier New", Courier, monospace;
+    font-size: .8rem; line-height: 1.9;
+  }
+  .sd pre .c { color: #666; }
+
+  .sd .tf { font-size: 1.15rem; }
+  .sd .note { font-size: .82rem; margin-top: 16px; }
+
+  /* FAQ: full width of the rule above, left-justified */
+  .sd .qa { text-align: left; }
+  .sd .qa p { max-width: none; }
+  .sd .q { font-weight: bold; margin: 0 0 6px; }
+  .sd .a { margin: 0; }
+  .sd .qa + .qa { margin-top: 26px; }
+
+  .sd footer { font-size: .9rem; }
+  .sd footer .dot { padding: 0 8px; }
+</style>
+
+<div class="sd">
+  <div class="wrap">
+
+    <img class="icon" src="data:image/png;base64,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" alt="Songdrop icon" width="72" height="72" />
+    <h1>Songdrop</h1>
+    <p class="sub">A companion app for a music library you host yourself. Search for a track, tap request, and your server finds it, tags it with artwork, and files it into Plex.</p>
+
+    <hr />
+
+    <h2>Run the server</h2>
+    <p>Songdrop&rsquo;s server runs in Docker on your NAS or home server, next to your Plex library and a running slskd server.</p>
+    <pre><span class="c">$</span> git clone https://github.com/jamesacklin/songdrop
+<span class="c">$</span> cd songdrop
+<span class="c">$</span> cp .env.example .env    <span class="c"># add your Plex + slskd details</span>
+<span class="c">$</span> docker compose up -d</pre>
+
+    <hr />
+
+    <h2>Get the app</h2>
+    <p>Install the iOS app from TestFlight, then enter your server&rsquo;s address and access key. That is the whole setup.</p>
+    <p><a class="tf" href="https://testflight.apple.com/join/YOUR-CODE">Join the TestFlight beta &rarr;</a></p>
+    <p class="note">Requires iOS 17 or later. Away from home, reach your server over Tailscale, WireGuard, or an HTTPS reverse proxy.</p>
+
+    <hr />
+
+    <div class="qa">
+      <p class="q">What do I need to run this?</p>
+      <p class="a">A machine that runs Docker &mdash; a NAS, home server, or mini PC &mdash; a Plex server for your library, and an <a href="https://github.com/slskd/slskd">slskd</a> (Soulseek) instance for Songdrop to search. The app is a remote; it does nothing on its own until it is pointed at your server.</p>
+    </div>
+    <div class="qa">
+      <p class="q">Is it free?</p>
+      <p class="a">The server is open-source and free to run. The app is distributed through TestFlight, which is free to join. You supply your own hardware and library.</p>
+    </div>
+    <div class="qa">
+      <p class="q">How does it find music?</p>
+      <p class="a">Songdrop searches your own slskd (Soulseek) instance for each request, prefers lossless files, and falls back to YouTube (via yt-dlp) only when nothing turns up. You run and configure slskd yourself &mdash; Songdrop ships with no sources. You are responsible for what you add and for respecting copyright.</p>
+    </div>
+    <div class="qa">
+      <p class="q">Does it work with Plex?</p>
+      <p class="a">Yes. It files each track into your Plex music library, scans just that folder, and can add it to a playlist you pick, creating the playlist if needed.</p>
+    </div>
+    <div class="qa">
+      <p class="q">Can I use it away from home?</p>
+      <p class="a">Yes, as long as your phone can reach your server &mdash; over a VPN like Tailscale or WireGuard, or a reverse proxy with HTTPS. The app talks to nothing but your server and public metadata catalogs.</p>
+    </div>
+    <div class="qa">
+      <p class="q">What about my privacy?</p>
+      <p class="a">No accounts, no analytics, no tracking. Your server address and key are stored on your device and sent only to the server you chose.</p>
+    </div>
+
+    <hr />
+
+    <footer>
+      <a href="https://github.com/jamesacklin/songdrop">GitHub</a>
+      <span class="dot">&middot;</span>
+      Self-hosted. Bring your own server.
+    </footer>
+
+  </div>
+</div>
+
+</body>
+</html>
