@@ -92,6 +92,17 @@ coffee shop, so put the server behind Tailscale/WireGuard (recommended) or a rev
 proxy with TLS + the API key. The project's Info.plist allows plain-HTTP for
 LAN/VPN use; remove `NSAllowsArbitraryLoads` from `project.yml` if you serve HTTPS.
 
+## Web app (PWA)
+
+The server also hosts a progressive web app that mirrors the iOS front-end — the
+same Search / Requests / Settings tabs, flows, and iOS look. It's served at the
+server root (`/`) from `server/app/static/` (no build step), talks to the same
+API same-origin, and is installable to the home screen (`manifest.webmanifest`
++ a service worker that caches the shell but never the API). On first load it
+asks for the server address (prefilled to the current origin) and access key,
+stored on-device. Nothing else to run — visiting the server in a browser is the
+whole install.
+
 ## API
 
 All endpoints (except `/api/health`) require the `X-API-Key` header.

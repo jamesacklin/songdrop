@@ -8,6 +8,7 @@ import time
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
 from . import clients, deezer, itunes, mb
@@ -370,3 +371,11 @@ async def playlists() -> dict:
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"plex playlist lookup failed: {e}") from e
     return {"playlists": [p["title"] for p in items]}
+
+
+# Serve the PWA (mirrors the iOS app) from the package's static/ dir. Mounted
+# last so the /api/* routes above always take precedence; the app authenticates
+# its own API calls with the X-API-Key it collects in onboarding.
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_static_dir):
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="pwa")

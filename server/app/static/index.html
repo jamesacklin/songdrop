@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Track Summon">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <title>Track Summon</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icon-180.png">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <!-- First-run: connect to the server -->
+  <div id="onboard">
+    <div class="ob-wrap">
+      <img class="ob-icon" src="/icon-192.png" alt="Track Summon">
+      <h1 class="ob-h1">Track Summon</h1>
+      <p class="ob-lead">A companion for a music library you host yourself.</p>
+      <div class="ob-card"><div class="ic">◎</div><div><div class="h">Connect to your server</div><div class="d">This app talks only to your Track Summon server. It has no catalog of its own and does nothing until it's connected.</div></div></div>
+      <div class="ob-card"><div class="ic">⌕</div><div><div class="h">Search and request</div><div class="d">Look up a track and send a request. Your server finds it, tags it, and files it into Plex.</div></div></div>
+      <div class="ob-card"><div class="ic">✓</div><div><div class="h">Your library, your rules</div><div class="d">Organize music you own and manage playlists. You're responsible for what you add and for respecting copyright.</div></div></div>
+      <div style="margin-top:22px">
+        <div style="font-weight:600;margin-bottom:8px">Connect</div>
+        <input class="ob-field" id="ob-url" type="url" inputmode="url" autocapitalize="off" autocorrect="off" placeholder="Server address (https://…)">
+        <input class="ob-field" id="ob-key" type="password" placeholder="Access key">
+        <div class="err hidden" id="ob-err"></div>
+        <button class="btn" id="ob-connect">Connect</button>
+        <p class="ob-note">Away from home, reach your server over Tailscale, WireGuard, or an HTTPS reverse proxy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app" class="hidden">
+    <section id="view-search" class="view active"></section>
+    <section id="view-requests" class="view"></section>
+    <section id="view-settings" class="view"></section>
+
+    <nav class="tabbar">
+      <button class="tab active" data-tab="search">
+        <svg viewBox="0 0 28 28" fill="currentColor"><path d="M12 3a9 9 0 016.9 14.8l5.1 5.1-1.9 1.9-5.1-5.1A9 9 0 1112 3zm0 2.6a6.4 6.4 0 100 12.8 6.4 6.4 0 000-12.8z"/></svg>
+        Search
+      </button>
+      <button class="tab" data-tab="requests">
+        <svg viewBox="0 0 28 28" fill="currentColor"><path d="M4 6.5A2.5 2.5 0 016.5 4h15A2.5 2.5 0 0124 6.5V16h-6.2a2 2 0 00-1.9 1.4 2.1 2.1 0 01-4 0A2 2 0 0010 16H4V6.5zM4 18h5.2a4.1 4.1 0 009.6 0H24v3.5a2.5 2.5 0 01-2.5 2.5h-15A2.5 2.5 0 014 21.5V18z"/></svg>
+        Requests
+      </button>
+      <button class="tab" data-tab="settings">
+        <svg viewBox="0 0 28 28" fill="currentColor"><path d="M14 9.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 2.4a2.1 2.1 0 110 4.2 2.1 2.1 0 010-4.2z"/><path d="M12.4 2h3.2l.6 3a8.4 8.4 0 012.2 1.3l2.9-1 1.6 2.8-2.3 2a8.5 8.5 0 010 2.6l2.3 2-1.6 2.8-2.9-1a8.4 8.4 0 01-2.2 1.3l-.6 3h-3.2l-.6-3a8.4 8.4 0 01-2.2-1.3l-2.9 1L4.9 20l2.3-2a8.5 8.5 0 010-2.6l-2.3-2 1.6-2.8 2.9 1A8.4 8.4 0 0111.8 5l.6-3z" opacity=".0"/></svg>
+        Settings
+      </button>
+    </nav>
+  </div>
+
+  <div class="scrim hidden" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
