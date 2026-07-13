@@ -19,6 +19,9 @@ targets:
         # Allows plain-HTTP servers on your LAN/VPN. Remove if your server has TLS.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
+        # App uses only standard HTTPS (exempt) crypto — declaring this skips the
+        # export-compliance prompt on every TestFlight/App Store upload.
+        ITSAppUsesNonExemptEncryption: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesacklin.songdrop
@@ -32,4 +35,4 @@ targets:
         # is filled in from the account you select in Xcode (or set it here to
         # your personal Team ID to preselect it).
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: 4S2D335HW6
