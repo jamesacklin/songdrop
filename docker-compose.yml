@@ -31,7 +31,9 @@ services:
       PLEX_URL: ${PLEX_URL:-}
       PLEX_TOKEN: ${PLEX_TOKEN:-}
       PLEX_SECTION: ${PLEX_SECTION:-}
-      SONGDROP_API_KEY: ${SONGDROP_API_KEY:?set in .env}
+      # Optional: leave unset and the server generates a key on first boot and
+      # prints it to the logs (docker compose logs tracksummon). Set one to pin it.
+      SONGDROP_API_KEY: ${SONGDROP_API_KEY:-}
       NTFY_URL: ${NTFY_URL:-}
       DATABASE_PATH: /data/songdrop.db
     volumes:

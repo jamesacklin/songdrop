@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import logging
 import os
+import secrets
 import time
 
 import httpx
@@ -22,14 +23,34 @@ log = logging.getLogger("songdrop")
 
 db = Database(settings.db_path)
 # Config saved via PUT /api/config overrides env defaults across restarts.
-settings.apply_overrides(db.get_config())
+_persisted = db.get_config()
+settings.apply_overrides(_persisted)
+
+# Access key resolution: an explicit SONGDROP_API_KEY env var always wins. If
+# it's unset, reuse a key persisted in /data from a previous boot, or generate
+# and persist one — so a fresh container is secured by default and the operator
+# can read the key from the container logs. `_auto_key` is set only in the
+# auto path, so an operator-provided key is never echoed to the logs.
+_auto_key = None
+if not settings.api_key:
+    settings.api_key = _persisted.get("api_key") or secrets.token_urlsafe(24)
+    if not _persisted.get("api_key"):
+        db.set_config({"api_key": settings.api_key})
+    _auto_key = settings.api_key
 
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     worker_task = asyncio.create_task(Worker(db).run())
-    if not settings.api_key:
-        log.warning("SONGDROP_API_KEY is not set; the API is unauthenticated")
+    if _auto_key:
+        log.warning(
+            "\n" + "=" * 64
+            + "\n  Track Summon access key (auto-generated — set SONGDROP_API_KEY to override):"
+            + "\n\n      %s\n"
+            + "\n  Enter this as the Access key when connecting the app or PWA.\n"
+            + "=" * 64,
+            _auto_key,
+        )
     yield
     worker_task.cancel()
     with contextlib.suppress(asyncio.CancelledError):
