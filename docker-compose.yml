@@ -12,9 +12,9 @@ services:
       - ./data/slskd:/app
       - ./data/downloads:/downloads
 
-  songdrop:
+  tracksummon:
     build: ./server
-    container_name: songdrop
+    container_name: tracksummon
     restart: unless-stopped
     ports:
       - "8585:8585"

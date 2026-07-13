@@ -89,7 +89,7 @@ class Worker:
             self.db.update(req["id"], status="failed", error=str(e))
             await notify.send(
                 settings.ntfy_url,
-                "Songdrop: request failed",
+                "Track Summon: request failed",
                 f"{req['artist']} - {req['title']}: {e}",
             )
         except Exception:
@@ -131,7 +131,7 @@ class Worker:
         self.db.update(rid, status="done", detail="ready to play")
         await notify.send(
             settings.ntfy_url,
-            "Songdrop: track ready",
+            "Track Summon: track ready",
             f"{meta.artist} - {meta.title} is in your library"
             + (f" (playlist: {req['playlist']})" if req.get("playlist") else ""),
         )

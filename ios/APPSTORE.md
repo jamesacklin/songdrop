@@ -1,6 +1,6 @@
-# Songdrop — TestFlight beta copy
+# Track Summon — TestFlight beta copy
 
-Songdrop is distributed **only through TestFlight**, not for general App Store
+Track Summon is distributed **only through TestFlight**, not for general App Store
 release. This file is the copy for the beta: the tester-facing description and
 the App Review notes. Because it isn't going to general availability, it names
 the actual moving parts (slskd, Plex, yt-dlp) plainly instead of talking around
@@ -18,14 +18,14 @@ them — the beta audience is self-hosters who run these tools already.
 ---
 
 ## App name
-Songdrop
+Track Summon
 
 ## Subtitle (30 char max)
 Remote for your music server
 
 ## What to Test (tester-facing beta description)
 
-Songdrop is a companion app for the self-hosted Songdrop server. Search for a
+Track Summon is a companion app for the self-hosted Track Summon server. Search for a
 track, send a request, and your own server locates it, tags it, and files it
 into your Plex library — then it's ready to play when you're home.
 
@@ -33,7 +33,7 @@ Before the app is useful you need the server side running:
 
 • A Docker host (NAS, home server, mini PC)
 • Plex, for your music library and playlists
-• slskd — a Soulseek client — which Songdrop searches for each request
+• slskd — a Soulseek client — which Track Summon searches for each request
   (it also falls back to YouTube via yt-dlp when slskd comes up empty)
 
 In this build, please try: connecting to your server, searching and requesting
@@ -47,7 +47,7 @@ request and for respecting copyright.
 
 ## App Review notes (only relevant if you enable EXTERNAL testing)
 
-> Songdrop is a companion/remote-control app for a server the user runs on their
+> Track Summon is a companion/remote-control app for a server the user runs on their
 > own hardware — the same model as a Transmission remote or a Plex/Overseerr
 > client. It performs no downloading, streaming, or file transfer on the device.
 >

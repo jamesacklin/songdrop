@@ -55,7 +55,7 @@ struct SearchView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Songdrop")
+            .navigationTitle("Track Summon")
             .searchable(text: $query, prompt: "Song, artist…")
             .onSubmit(of: .search) { Task { await runSearch() } }
             .onChange(of: query) { _, newValue in

@@ -1,4 +1,4 @@
-"""Songdrop API: song-first requests for a self-hosted music library."""
+"""Track Summon API: song-first requests for a self-hosted music library."""
 
 import asyncio
 import contextlib
@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
         await worker_task
 
 
-app = FastAPI(title="Songdrop", lifespan=lifespan)
+app = FastAPI(title="Track Summon", lifespan=lifespan)
 
 
 async def require_api_key(x_api_key: str | None = Header(default=None)) -> None:

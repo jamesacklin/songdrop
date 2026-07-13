@@ -12,7 +12,7 @@ targets:
     info:
       path: Songdrop/Info.plist
       properties:
-        CFBundleDisplayName: Songdrop
+        CFBundleDisplayName: Track Summon
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

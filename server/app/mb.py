@@ -12,7 +12,7 @@ import httpx
 
 BASE = "https://musicbrainz.org/ws/2"
 CAA = "https://coverartarchive.org"
-HEADERS = {"User-Agent": "Songdrop/1.0 (self-hosted music requester)"}
+HEADERS = {"User-Agent": "Track Summon/1.0 (self-hosted music requester)"}
 
 
 def _lucene_escape(s: str) -> str:

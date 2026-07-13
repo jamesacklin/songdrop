@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// First-run setup. Frames Songdrop honestly for what it is: a remote control
+/// First-run setup. Frames Track Summon honestly for what it is: a remote control
 /// for a music library server you run yourself. The app does nothing until it's
 /// pointed at your own server — there is no built-in catalog or content.
 struct OnboardingView: View {
@@ -20,7 +20,7 @@ struct OnboardingView: View {
                         Image(systemName: "music.note.house.fill")
                             .font(.system(size: 44))
                             .foregroundStyle(.tint)
-                        Text("Welcome to Songdrop")
+                        Text("Welcome to Track Summon")
                             .font(.largeTitle.bold())
                         Text("A remote for your personal music library server.")
                             .font(.title3)
@@ -31,7 +31,7 @@ struct OnboardingView: View {
                         InfoRow(
                             icon: "server.rack",
                             title: "Connect to your own server",
-                            detail: "Songdrop is a companion app. It talks only to a Songdrop server that you run at home — it has no catalog or content of its own and does nothing until it's connected."
+                            detail: "Track Summon is a companion app. It talks only to a Track Summon server that you run at home — it has no catalog or content of its own and does nothing until it's connected."
                         )
                         InfoRow(
                             icon: "magnifyingglass",
@@ -82,7 +82,7 @@ struct OnboardingView: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(serverURL.isEmpty || isConnecting)
 
-                        Text("Don't have a server yet? Songdrop is open-source software you install on your own machine. See the project's setup guide to get started.")
+                        Text("Don't have a server yet? Track Summon is open-source software you install on your own machine. See the project's setup guide to get started.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }

@@ -1,4 +1,4 @@
-# Songdrop
+# Track Summon
 
 Song-first requests for a self-hosted music library. Shazam a track at a coffee
 shop, open the app, search, tap **Add to Library** — and the next time you're
@@ -7,7 +7,7 @@ home it's in Plex, properly tagged, with album art, in the playlist you asked fo
 The flow (as described in [Joe Karlsson's post](https://www.joekarlsson.com/blog/self-hosted-music-still-sucks-in-2026/)):
 
 ```
-iOS app ──▶ Songdrop server ──▶ slskd (Soulseek) ──▶ tag (mutagen) ──▶ Plex library
+iOS app ──▶ Track Summon server ──▶ slskd (Soulseek) ──▶ tag (mutagen) ──▶ Plex library
    search      request queue        acquisition          metadata +        partial scan +
    (Deezer)                                              album art         playlist add
                                                                               │
@@ -47,21 +47,21 @@ docker compose up -d --build
 Notes:
 
 - **slskd**: on first run, open http://your-server:5030, log in, and add your Soulseek
-  credentials. For Songdrop's access, either create an API key (Options → Web →
+  credentials. For Track Summon's access, either create an API key (Options → Web →
   Authentication → API keys) and set `SLSKD_API_KEY`, or set
-  `SLSKD_USERNAME`/`SLSKD_PASSWORD` to the web UI login (Songdrop handles the JWT
+  `SLSKD_USERNAME`/`SLSKD_PASSWORD` to the web UI login (Track Summon handles the JWT
   session itself). If you already run slskd (e.g. alongside Lidarr), delete the
   `slskd` service from the compose file and point `SLSKD_URL` at your existing instance —
-  just make sure Songdrop can see slskd's completed-downloads folder at
+  just make sure Track Summon can see slskd's completed-downloads folder at
   `SLSKD_DOWNLOADS_DIR`.
 - **Plex token**: any signed-in Plex Web session → open an item → Get Info → View XML →
   copy the `X-Plex-Token` from the URL.
-- **Path mapping**: `MUSIC_LIBRARY_DIR` is the library as *Songdrop* sees it (`/music`
+- **Path mapping**: `MUSIC_LIBRARY_DIR` is the library as *Track Summon* sees it (`/music`
   in the container). If Plex sees that same folder at a different path, set
   `PLEX_LIBRARY_DIR` so partial scans target the right directory.
-- **Lidarr coexistence**: Songdrop writes normal `Artist/Album/NN - Title.ext` files, so
+- **Lidarr coexistence**: Track Summon writes normal `Artist/Album/NN - Title.ext` files, so
   it lives happily next to a Lidarr-managed library. Keep Lidarr for full-album/artist
-  monitoring; use Songdrop for one-off tracks.
+  monitoring; use Track Summon for one-off tracks.
 
 Run without Docker if you prefer:
 
