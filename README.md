@@ -38,37 +38,97 @@ re-queued on startup.
 
 ## Server setup
 
+The server is published as a multi-arch (amd64 + arm64) image on Docker Hub:
+[`jamesacklin/track-summon`](https://hub.docker.com/r/jamesacklin/track-summon).
+
 ```bash
-cp .env.example .env
-# fill in SLSKD_API_KEY, SONGDROP_API_KEY, MUSIC_LIBRARY_PATH, PLEX_URL, PLEX_TOKEN
-docker compose up -d --build
+docker run -d --name track-summon -p 8585:8585 \
+  -v track-summon-data:/data \
+  -v /srv/plex/music:/music \
+  -v /srv/slskd/downloads:/downloads \
+  -e SLSKD_URL=http://your-slskd:5030 \
+  -e SLSKD_USERNAME=you -e SLSKD_PASSWORD=secret \
+  -e PLEX_URL=http://your-plex:32400 -e PLEX_TOKEN=xxxx \
+  jamesacklin/track-summon:latest
+
+docker logs track-summon 2>&1 | grep -A2 "access key"   # <- your access key
 ```
 
-Notes:
+slskd and Plex can also be configured from the app's **Settings** later instead of
+env vars — but the **volume mounts below are not configurable at runtime**, so get
+them right at `docker run` / compose time.
 
-- **slskd**: on first run, open http://your-server:5030, log in, and add your Soulseek
-  credentials. For Track Summon's access, either create an API key (Options → Web →
-  Authentication → API keys) and set `SLSKD_API_KEY`, or set
-  `SLSKD_USERNAME`/`SLSKD_PASSWORD` to the web UI login (Track Summon handles the JWT
-  session itself). If you already run slskd (e.g. alongside Lidarr), delete the
-  `slskd` service from the compose file and point `SLSKD_URL` at your existing instance —
-  just make sure Track Summon can see slskd's completed-downloads folder at
-  `SLSKD_DOWNLOADS_DIR`.
+### Volumes — get these right
+
+| Container path | What it holds | Must be mounted to… |
+| --- | --- | --- |
+| `/data` | SQLite request queue + the auto-generated access key | any persistent volume (named volume or host dir) so it survives restarts |
+| `/music` | where finished tracks are filed (`Artist/Album/NN - Title.ext`) | **the exact folder your Plex music library scans** |
+| `/downloads` | where slskd drops completed files, so the server can find them | **the same folder your slskd writes completed downloads to** |
+
+**The #1 gotcha (files download but never show up in Plex):** if `/music` isn't the
+same underlying folder your Plex music library points at, tracks are acquired and filed
+successfully but land somewhere Plex can't see — and if you didn't mount `/music` at
+all, they sit in the container's ephemeral filesystem and vanish on the next
+`docker rm`. Mount `/music` to your real Plex music folder.
+
+**Path mapping (`PLEX_LIBRARY_DIR`):** Track Summon and Plex are usually separate
+containers that mount the *same host folder at different container paths*. Track Summon
+writes to `/music`; if your Plex has that library added as, say, `/media`, set
+`-e PLEX_LIBRARY_DIR=/media` so the scan targets the path Plex actually knows. Example:
+
+```
+host: /srv/plex/music
+  ├── mounted into Track Summon as /music   (MUSIC_LIBRARY_DIR, default)
+  └── mounted into Plex           as /media  → set PLEX_LIBRARY_DIR=/media
+```
+
+The app's **Settings → Storage** shows the effective `/downloads`, `/music`, and
+"Plex reads" paths so you can confirm the mapping without shelling into the container.
+After a request finishes, the status is honest about it: `ready to play` only if Plex
+actually indexed the track, otherwise it tells you the file is filed on disk but Plex
+hasn't picked it up (check this mapping).
+
+### Access key
+
+`SONGDROP_API_KEY` is **optional** — leave it unset and the server generates a key on
+first boot, persists it in `/data`, and prints it to the logs (`docker logs`). Set the
+env var to pin your own. Either way, enter it as the **Access key** in the app/PWA.
+
+### Other notes
+
+- **slskd**: open `http://your-server:5030`, log in, add your Soulseek credentials. Give
+  Track Summon access with either an API key (Options → Web → Authentication → API keys,
+  set `SLSKD_API_KEY`) or `SLSKD_USERNAME`/`SLSKD_PASSWORD`. Track Summon must be able to
+  read slskd's completed-downloads folder at `SLSKD_DOWNLOADS_DIR` (`/downloads`) — mount
+  the same host folder into both containers.
 - **Plex token**: any signed-in Plex Web session → open an item → Get Info → View XML →
-  copy the `X-Plex-Token` from the URL.
-- **Path mapping**: `MUSIC_LIBRARY_DIR` is the library as *Track Summon* sees it (`/music`
-  in the container). If Plex sees that same folder at a different path, set
-  `PLEX_LIBRARY_DIR` so partial scans target the right directory.
-- **Lidarr coexistence**: Track Summon writes normal `Artist/Album/NN - Title.ext` files, so
-  it lives happily next to a Lidarr-managed library. Keep Lidarr for full-album/artist
-  monitoring; use Track Summon for one-off tracks.
+  copy `X-Plex-Token` from the URL.
+- **YouTube fallback**: on by default; disable with `YTDLP_ENABLED=false` or the toggle in
+  Settings → Sources.
+- **Lidarr coexistence**: Track Summon writes normal `Artist/Album/NN - Title.ext` files,
+  so it sits happily next to a Lidarr-managed library.
 
-Run without Docker if you prefer:
+### From source (docker compose)
+
+The bundled compose runs slskd + Track Summon together and wires the volumes for you:
+
+```bash
+cp .env.example .env
+# set MUSIC_LIBRARY_PATH to the HOST path of your Plex music folder;
+# set PLEX_URL / PLEX_TOKEN and slskd creds. SONGDROP_API_KEY is optional.
+docker compose up -d --build
+docker compose logs tracksummon | grep -A2 "access key"
+```
+
+Or without Docker:
 
 ```bash
 cd server
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-SLSKD_URL=... SLSKD_API_KEY=... MUSIC_LIBRARY_DIR=... \
+SLSKD_URL=... SLSKD_USERNAME=... SLSKD_PASSWORD=... \
+MUSIC_LIBRARY_DIR=/path/to/plex/music SLSKD_DOWNLOADS_DIR=/path/to/downloads \
+PLEX_URL=... PLEX_TOKEN=... \
   .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8585
 ```
 
