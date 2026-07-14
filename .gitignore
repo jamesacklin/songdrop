@@ -10,3 +10,6 @@ ios/Songdrop.xcodeproj/
 ios/Songdrop/Info.plist
 xcuserdata/
 DerivedData/
+
+# Cloudflare wrangler local cache
+.wrangler/
