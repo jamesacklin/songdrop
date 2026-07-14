@@ -98,6 +98,19 @@
       <p class="a">A machine that runs Docker &mdash; a NAS, home server, or mini PC &mdash; a Plex server for your library, and an <a href="https://github.com/slskd/slskd">slskd</a> (Soulseek) instance for Track Summon to search. The app is a remote; it does nothing on its own until it is pointed at your server.</p>
     </div>
     <div class="qa">
+      <p class="q">How do I set up the Docker container?</p>
+      <p class="a">Run the published image and mount three folders &mdash; one for its own data (the request queue and the access key it generates), one for your Plex music library, and one for the folder slskd saves finished downloads to. Point it at slskd and Plex with environment variables, or leave those out and set them later in the app:</p>
+      <pre><span class="c">$</span> docker run -d --name track-summon -p 8585:8585 \
+    -v track-summon-data:/data \
+    -v /your/plex/music:/music \
+    -v /your/slskd/downloads:/downloads \
+    -e SLSKD_URL=http://slskd:5030 \
+    -e SLSKD_USERNAME=you -e SLSKD_PASSWORD=secret \
+    -e PLEX_URL=http://plex:32400 -e PLEX_TOKEN=xxxx \
+    jamesacklin/track-summon:latest</pre>
+      <p class="a">The mount that matters most is /music: it has to be the exact folder your Plex library scans, or tracks download and file successfully but never appear in Plex. If Plex sees that folder at a different path, add PLEX_LIBRARY_DIR set to the path Plex uses. On first boot the server prints an access key to its logs &mdash; enter that in the app. The <a href="https://github.com/jamesacklin/track-summon#server-setup">README</a> lists every mount and variable.</p>
+    </div>
+    <div class="qa">
       <p class="q">Is it free?</p>
       <p class="a">The server is open-source and free to run. The app is distributed through TestFlight, which is free to join. You supply your own hardware and library.</p>
     </div>
