@@ -94,9 +94,21 @@ async def _probe_plex() -> dict:
 
 @app.get("/api/status", dependencies=[Depends(require_api_key)])
 async def status() -> dict:
-    """Downstream connectivity: is slskd up and on the Soulseek network? Is Plex up?"""
+    """Downstream connectivity plus where files land — the paths are env/volume
+    driven (not runtime-editable), so surfacing them lets the app diagnose the
+    common 'ready to play but not in Plex' volume-mapping mistake."""
     slskd_status, plex_status = await asyncio.gather(_probe_slskd(), _probe_plex())
-    return {"ok": slskd_status["ok"] and plex_status["ok"], "slskd": slskd_status, "plex": plex_status}
+    return {
+        "ok": slskd_status["ok"] and plex_status["ok"],
+        "slskd": slskd_status,
+        "plex": plex_status,
+        "ytdlp_enabled": settings.ytdlp_enabled,
+        "paths": {
+            "music_library_dir": settings.music_library_dir,
+            "plex_library_dir": settings.plex_library_dir,
+            "slskd_downloads_dir": settings.slskd_downloads_dir,
+        },
+    }
 
 
 class ConfigIn(BaseModel):
@@ -107,6 +119,7 @@ class ConfigIn(BaseModel):
     plex_url: str | None = None
     plex_token: str | None = None
     plex_section: str | None = None
+    ytdlp_enabled: bool | None = None
 
     @field_validator("slskd_url", "plex_url")
     @classmethod
@@ -140,8 +153,8 @@ async def put_config(body: ConfigIn) -> dict:
     }
     if updates:
         settings.apply_overrides(updates)
-        # Persist the normalized values so restarts see the same config.
-        db.set_config({k: getattr(settings, k) for k in updates})
+        # Persist normalized values as strings (the config table is TEXT).
+        db.set_config({k: str(getattr(settings, k)) for k in updates})
     return settings.runtime_config()
 
 

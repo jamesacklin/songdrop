@@ -447,6 +447,7 @@ async function checkStatus(force) {
 
 // ---------- Settings view ----------
 let cfg = {};
+let _extrasWrap = null;
 function renderSettings() {
   const v = $("#view-settings"); v.innerHTML = "";
   v.append(h("div", { class: "nav" }, h("div", { class: "nav-row" }, h("h1", {}, "Settings"))));
@@ -475,6 +476,10 @@ function renderSettings() {
   body.append(slskdWrap, plexWrap);
   renderConfigSections(slskdWrap, plexWrap);
 
+  // Sources (YouTube fallback toggle) + Storage (read-only paths); filled after connect
+  _extrasWrap = h("div");
+  body.append(_extrasWrap);
+
   // Defaults
   const plIn = h("input", { class: "v", value: defaultPlaylist, placeholder: "Default playlist (optional)", autocapitalize: "words",
     onchange: (e) => { defaultPlaylist = e.target.value.trim(); LS.setItem("ts_playlist", defaultPlaylist); } });
@@ -497,6 +502,7 @@ async function testConnection(statusRow) {
       statusRow.append(statusLine("slskd", cachedStatus.slskd.ok, cachedStatus.slskd.detail));
       statusRow.append(statusLine("Plex", cachedStatus.plex.ok, cachedStatus.plex.detail));
     }
+    renderExtras();
   } catch (e) {
     statusRow.append(statusLine("Track Summon server", false, e.status === 401 ? "Wrong API key" : e.message));
   }
@@ -504,6 +510,39 @@ async function testConnection(statusRow) {
 function statusLine(name, ok, detail) {
   return h("div", { class: "srow" }, h("span", { class: "dot " + (ok ? "ok" : "bad") }), h("span", {}, name),
     h("span", { class: "status-detail" }, detail || ""));
+}
+function renderExtras() {
+  if (!_extrasWrap) return;
+  _extrasWrap.innerHTML = "";
+  // Sources — YouTube fallback toggle (runtime config)
+  const toggle = h("input", { type: "checkbox", style: "width:20px;height:20px;accent-color:var(--tint)" });
+  toggle.checked = cfg.ytdlp_enabled !== false;
+  toggle.addEventListener("change", async () => {
+    const next = toggle.checked;
+    try { await API.saveConfig({ ytdlp_enabled: next }); cfg.ytdlp_enabled = next; toast("YouTube fallback " + (next ? "on" : "off")); }
+    catch (e) { toggle.checked = !next; toast(e.message); }
+  });
+  _extrasWrap.append(
+    h("div", { class: "section-hdr" }, "Sources"),
+    h("div", { class: "group" },
+      h("label", { class: "srow", style: "cursor:pointer" }, h("span", {}, "YouTube fallback"),
+        h("span", { style: "margin-left:auto;display:flex" }, toggle))),
+    h("div", { class: "section-ftr" }, "When a track isn't on Soulseek, fall back to YouTube (yt-dlp, ~128 kbps). Off = Soulseek only; unfound tracks keep retrying."));
+  // Storage — read-only server paths
+  const p = cachedStatus && cachedStatus.paths;
+  if (p) {
+    _extrasWrap.append(
+      h("div", { class: "section-hdr" }, "Storage (server paths)"),
+      h("div", { class: "group" },
+        pathRow("Downloads", p.slskd_downloads_dir),
+        pathRow("Library", p.music_library_dir),
+        pathRow("Plex reads", p.plex_library_dir)),
+      h("div", { class: "section-ftr" }, "Where the server reads and writes, set by the container's volume mounts. If “Library” isn't the same folder your Plex music library points at, tracks won't show up in Plex."));
+  }
+}
+function pathRow(k, v) {
+  return h("div", { class: "srow" }, h("span", {}, k),
+    h("span", { class: "status-detail", style: "font-family:ui-monospace,Menlo,monospace;font-size:12px;max-width:62%" }, v || "—"));
 }
 let cfgFields = {};
 function renderConfigSections(slskdWrap, plexWrap) {

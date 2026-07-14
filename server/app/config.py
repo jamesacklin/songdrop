@@ -15,6 +15,7 @@ RUNTIME_KEYS = (
     "plex_url",
     "plex_token",
     "plex_section",
+    "ytdlp_enabled",
 )
 
 
@@ -68,7 +69,13 @@ class Settings:
         for key, value in overrides.items():
             if key not in RUNTIME_KEYS or value is None:
                 continue
-            value = value.strip()
+            if key == "ytdlp_enabled":
+                self.ytdlp_enabled = (
+                    value if isinstance(value, bool)
+                    else str(value).strip().lower() not in ("false", "0", "no", "off", "")
+                )
+                continue
+            value = str(value).strip()
             if key.endswith("_url"):
                 value = value.rstrip("/")
             setattr(self, key, value)

@@ -109,8 +109,9 @@ class Worker:
             local_path = req.get("source_path") or ""
             if not os.path.isfile(local_path):
                 raise PipelineError(f"file not found: {local_path}")
+            source = "your file"
         else:
-            local_path = await self.acquire(req)
+            local_path, source = await self.acquire(req)
 
         self.db.update(rid, status="tagging", detail="tagging metadata")
         meta = await self.build_meta(req)
@@ -126,19 +127,29 @@ class Worker:
         self.db.update(rid, file_path=final_path, detail="moved into library")
         log.info("request %s: moved to %s", rid, final_path)
 
-        await self.plex_import(req, meta, final_path)
+        # Verify the track actually landed in Plex before claiming it's ready —
+        # a scan that targets the wrong path (bad volume/PLEX_LIBRARY_DIR mapping)
+        # silently imports nothing, so "ready to play" would otherwise lie.
+        in_plex, note = await self.plex_import(req, meta, final_path)
+        srcsfx = f" · {source}" if source and source != "your file" else ""
+        if in_plex is None:
+            detail = f"saved to your library (Plex not configured){srcsfx}"
+        elif in_plex:
+            detail = (note or "ready to play") + srcsfx
+        else:
+            detail = note  # honest failure note (path mapping / Plex error)
 
-        self.db.update(rid, status="done", detail="ready to play")
+        self.db.update(rid, status="done", detail=detail)
         await notify.send(
             settings.ntfy_url,
-            "Track Summon: track ready",
-            f"{meta.artist} - {meta.title} is in your library"
-            + (f" (playlist: {req['playlist']})" if req.get("playlist") else ""),
+            "Track Summon: track ready" if in_plex or in_plex is None else "Track Summon: needs attention",
+            f"{meta.artist} - {meta.title}: {detail}",
         )
 
-    async def acquire(self, req: dict) -> str:
-        """Download the track: a user-supplied YouTube URL wins, otherwise
-        Soulseek (best candidate), otherwise the YouTube fallback."""
+    async def acquire(self, req: dict) -> tuple[str, str]:
+        """Download the track and return (local_path, source_label). A supplied
+        YouTube URL wins, otherwise Soulseek (best candidate), otherwise the
+        YouTube fallback."""
         rid = req["id"]
 
         if req.get("youtube_url"):
@@ -151,7 +162,7 @@ class Worker:
                 raise PipelineError(f"YouTube download failed: {e}") from e
             if path is None:
                 raise PipelineError("YouTube download produced no file")
-            return path
+            return path, "YouTube link"
 
         self.db.update(rid, status="searching", detail="searching Soulseek")
         query = f"{req['artist']} {req['title']}"
@@ -202,12 +213,12 @@ class Worker:
                     f"{settings.slskd_downloads_dir} (check volume mapping)"
                 )
                 continue
-            return local
+            return local, "Soulseek"
         # Candidates existed but every attempt failed; try YouTube before giving
         # up (peers may also be back later, so this stays retryable).
         return await self._youtube_fallback(req, last_error, ui="Soulseek attempts failed — trying YouTube")
 
-    async def _youtube_fallback(self, req: dict, reason: str, ui: str = "trying YouTube") -> str:
+    async def _youtube_fallback(self, req: dict, reason: str, ui: str = "trying YouTube") -> tuple[str, str]:
         if not settings.ytdlp_enabled:
             raise PipelineError(reason, retryable=True)
         rid = req["id"]
@@ -226,7 +237,7 @@ class Worker:
         if path is None:
             raise PipelineError(f"{reason}; YouTube had no good match either", retryable=True)
         self.db.update(rid, detail="downloaded from YouTube (~128kbps AAC)")
-        return path
+        return path, "YouTube (~128kbps AAC)"
 
     async def build_meta(self, req: dict) -> TrackMeta:
         meta = TrackMeta(
@@ -268,10 +279,16 @@ class Worker:
                         meta.cover, meta.cover_mime = cover
         return meta
 
-    async def plex_import(self, req: dict, meta: TrackMeta, final_path: str) -> None:
+    async def plex_import(self, req: dict, meta: TrackMeta, final_path: str) -> tuple[bool | None, str | None]:
+        """Scan the file into Plex and confirm it actually indexed.
+
+        Returns (in_plex, note):
+          None  -> Plex isn't configured (nothing to import into)
+          True  -> confirmed present in Plex (note may carry a playlist warning)
+          False -> filed on disk but Plex never indexed it (note explains)
+        """
         if not self.plex.configured:
-            self.db.update(req["id"], detail="Plex not configured; skipped scan")
-            return
+            return None, None
         rid = req["id"]
         self.db.update(rid, status="importing", detail="scanning into Plex")
         try:
@@ -284,16 +301,21 @@ class Worker:
                 plex_dir = os.path.join(settings.plex_library_dir, rel)
             await self.plex.refresh_path(section, plex_dir)
 
+            # Always verify the scan actually indexed the track — a wrong path
+            # mapping scans nothing and would otherwise look like success.
+            key = await self.plex.wait_for_track(section, meta.title, meta.artist, timeout=60)
+            if key is None:
+                return False, (
+                    f"filed at {final_path}, but Plex hasn't indexed it — check that "
+                    "this path is inside your Plex music library (volume mount / PLEX_LIBRARY_DIR)"
+                )
             if req.get("playlist"):
-                self.db.update(rid, detail=f"adding to playlist '{req['playlist']}'")
-                key = await self.plex.wait_for_track(section, meta.title, meta.artist)
-                if key is None:
-                    # File is in the library; a missed playlist add isn't fatal.
-                    self.db.update(
-                        rid, detail="imported, but track not visible in Plex yet; playlist skipped"
-                    )
-                    return
-                await self.plex.add_to_playlist(req["playlist"], key)
+                try:
+                    await self.plex.add_to_playlist(req["playlist"], key)
+                except Exception as e:  # noqa: BLE001 - playlist add is non-fatal
+                    log.warning("playlist add failed for request %s: %s", rid, e)
+                    return True, f"in Plex; couldn't add to playlist '{req['playlist']}' ({e})"
+            return True, None
         except Exception as e:  # noqa: BLE001 - Plex failures must not lose the file
             log.warning("plex import step failed for request %s: %s", rid, e)
-            self.db.update(rid, detail=f"file in library, but Plex step failed: {e}")
+            return False, f"filed at {final_path}, but the Plex step failed: {e}"
