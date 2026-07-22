@@ -13,3 +13,12 @@ DerivedData/
 
 # Cloudflare wrangler local cache
 .wrangler/
+
+# iOS build output + fastlane / signing artifacts (never commit private keys)
+ios/build/
+ios/*.p12
+ios/*.cer
+ios/*.certSigningRequest
+ios/*.mobileprovision
+ios/fastlane/report.xml
+ios/fastlane/README.md

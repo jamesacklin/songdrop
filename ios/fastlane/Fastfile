@@ -1,0 +1,80 @@
+# TestFlight build + upload for Songdrop, driven by an App Store Connect API key
+# (no Apple ID login needed). Set these in the environment before running:
+#
+#   ASC_KEY_ID      App Store Connect API key id
+#   ASC_ISSUER_ID   App Store Connect API issuer id
+#   ASC_KEY_PATH    absolute path to the AuthKey_<id>.p8 file
+#
+# Notes:
+# - The app record must already exist in App Store Connect (Apple's API cannot
+#   create apps, and `produce` needs an Apple ID login).
+# - On a headless/first-time machine, signing can hang on a keychain-access
+#   prompt. Fix by importing the distribution cert/key into a dedicated keychain
+#   with a known password and running:
+#     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k <pw> <keychain>
+#   then put that keychain first in `security list-keychains -d user -s`.
+
+opt_out_usage
+default_platform(:ios)
+
+APP_ID  = "com.jamesacklin.songdropapp"
+TEAM_ID = "FTFY9QQ2XQ" # paid Developer Program team (owns the dist cert + ASC key)
+
+def key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH"),
+    in_house: false
+  )
+end
+
+platform :ios do
+  # Ensure dist cert + App Store profile, then build a signed .ipa.
+  lane :build do
+    api_key = key
+    cert(api_key: api_key, platform: "ios")
+    sigh(api_key: api_key, app_identifier: APP_ID, platform: "ios") # appstore profile
+    profile = lane_context[SharedValues::SIGH_NAME]
+    UI.user_error!("no appstore profile name captured") if profile.to_s.empty?
+    UI.message("Using provisioning profile: #{profile}")
+
+    # Xcode 16+ reads profiles from a new directory; make sure it's there too.
+    profile_path = lane_context[SharedValues::SIGH_PROFILE_PATH]
+    uuid = lane_context[SharedValues::SIGH_UUID]
+    dest = File.expand_path("~/Library/Developer/Xcode/UserData/Provisioning Profiles")
+    sh("mkdir -p \"#{dest}\" && cp \"#{profile_path}\" \"#{dest}/#{uuid}.mobileprovision\"")
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Songdrop.xcodeproj",
+      team_id: TEAM_ID,
+      code_sign_identity: "Apple Distribution",
+      bundle_identifier: APP_ID,
+      profile_name: profile,
+      targets: ["Songdrop"]
+    )
+    build_app(
+      project: "Songdrop.xcodeproj",
+      scheme: "Songdrop",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      output_name: "Songdrop.ipa",
+      export_options: {
+        signingStyle: "manual",
+        teamID: TEAM_ID,
+        provisioningProfiles: { APP_ID => profile }
+      }
+    )
+  end
+
+  # Upload the built .ipa to TestFlight (run after the app record exists).
+  lane :upload do
+    upload_to_testflight(
+      api_key: key,
+      ipa: "build/Songdrop.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

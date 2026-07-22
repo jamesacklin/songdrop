@@ -24,7 +24,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesacklin.songdrop
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesacklin.songdropapp
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
