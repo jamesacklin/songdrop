@@ -67,13 +67,17 @@ dodge an App Store name collision, then reverted.) The iOS home-screen name is
 
 ## Marketing site (Cloudflare Pages)
 
-- `site/index.html` is a deliberately plain, self-contained page (system font
-  stack, black on white, one file — no build step).
+- `site/index.html` + `site/editorial.css` — styled with the **`@ackl/editorial`**
+  design system (vendored into `editorial.css`; left-aligned, Arimo, dark-mode
+  aware). No build step. `index.html` links `./editorial.css` and uses its
+  `--ed-*` CSS variables, so **both files must ship together** (an earlier plain
+  centered layout was replaced by this via PR #1).
 - Hosted on a Cloudflare Pages project named **`songdrop`**, custom domain
   **`songdrop.ackl.in`** (zone `ackl.in`), proxied CNAME → `songdrop.pages.dev`.
 - Redeploy: `CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… ./deploy-site.sh`
-  (uses `npx wrangler pages deploy`). The token needs Account · Cloudflare Pages ·
-  Edit (plus Zone · DNS · Edit + Zone · Read on `ackl.in` to manage the domain).
+  (uses `npx wrangler pages deploy site` — deploys the whole `site/` dir, so
+  `editorial.css` goes too). The token needs Account · Cloudflare Pages · Edit
+  (plus Zone · DNS · Edit + Zone · Read on `ackl.in` to manage the domain).
 - The TestFlight join link in the page must match the current app's TestFlight.
 
 ## iOS / TestFlight
