@@ -5,45 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Songdrop</title>
 <meta name="description" content="Song-first requests for self-hosted music libraries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./editorial.css">
 </head>
 <body class="editorial">
 <style>
-  /* Songdrop's centered product-page variant of the shared editorial system. */
+  /* Songdrop's compact, content-first use of the shared editorial system. */
   .sd * { box-sizing: border-box; }
   .sd {
     color: var(--ed-color-foreground);
     font-family: var(--ed-font-sans);
-    font-size: 19px;
+    font-size: 1rem;
     line-height: 1.5;
     margin: 0;
-    padding: 20px 0 0;
-    text-align: center;
+    padding: 0;
+    text-align: left;
   }
-  .sd .wrap { max-width: var(--ed-measure-wide); margin: 0 auto; }
+  .sd .wrap { max-width: var(--ed-measure); margin: 0 auto; }
 
   .sd a { color: var(--ed-color-link); text-decoration: underline; text-underline-offset: 2px; }
 
-  .sd .icon { width: 72px; height: 72px; display: block; margin: 0 auto 22px; }
+  .sd .icon { width: 3rem; height: 3rem; display: block; margin: 0 0 var(--ed-space-2); }
 
   .sd h1 {
-    font-size: 2.9rem; font-weight: normal; margin: 0 0 18px;
-    letter-spacing: .01em;
+    font-size: 1em; font-weight: 700; margin: 0 0 var(--ed-space-2);
+    letter-spacing: normal;
   }
-  .sd .sub { font-size: 1.2rem; margin: 0 auto; max-width: none; }
+  .sd .sub { font-size: 1em; margin: 0; max-width: none; }
 
   .sd hr {
-    border: 0; border-top: 1px solid var(--ed-color-border); width: 100%;
-    margin: 44px auto;
+    border: 0; width: 100%;
+    margin: var(--ed-space-5) 0 0;
   }
 
-  .sd h2 { font-size: 1.5rem; font-weight: normal; margin: 0 0 12px; }
-  .sd p { margin: 0 auto 14px; max-width: none; }
+  .sd h2 { font-size: 1em; font-weight: 700; margin: 0 0 var(--ed-space-2); }
+  .sd p { margin: 0 0 var(--ed-space-2); max-width: none; }
   .sd p:last-child { margin-bottom: 0; }
 
   .sd pre {
     display: block; width: fit-content; max-width: 100%;
-    margin: 20px auto 0; padding: 14px 18px;
+    margin: var(--ed-space-2) 0 0; padding: var(--ed-space-2) var(--ed-space-3);
     text-align: left; overflow-x: auto;
     border: 1px solid var(--ed-color-border);
     font-family: var(--ed-font-mono);
@@ -52,17 +55,17 @@
   .sd pre .c { color: #666; }
   .sd .qa pre { margin-bottom: 20px; }
 
-  .sd .tf { font-size: 1.15rem; }
-  .sd .note { font-size: .82rem; margin-top: 16px; }
+  .sd .tf { font-size: 1em; }
+  .sd .note { font-size: .9em; margin-top: var(--ed-space-2); }
 
-  /* FAQ: full width of the rule above, left-justified */
+  /* FAQ entries use the same vertical rhythm as the index page's timeline. */
   .sd .qa { text-align: left; }
   .sd .qa p { max-width: none; }
-  .sd .q { font-weight: bold; margin: 0 0 6px; }
+  .sd .q { font-weight: 700; margin: 0 0 var(--ed-space-1); }
   .sd .a { margin: 0; }
-  .sd .qa + .qa { margin-top: 26px; }
+  .sd .qa + .qa { margin-top: var(--ed-space-4); }
 
-  .sd footer { font-size: .9rem; }
+  .sd footer { font-size: .9em; }
   .sd footer .dot { padding: 0 8px; }
 </style>
 
