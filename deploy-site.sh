@@ -8,9 +8,9 @@
 # Usage:
 #   CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... ./deploy-site.sh
 #
-# The site is served at https://summon.ackl.in (custom domain on the
-# "track-summon" Pages project, alias track-summon.pages.dev).
+# The site is served at https://songdrop.ackl.in (custom domain on the
+# "songdrop" Pages project, alias songdrop.pages.dev).
 set -e
 DIR="$(cd "$(dirname "$0")/site" && pwd)"
 exec npx --yes wrangler@latest pages deploy "$DIR" \
-  --project-name track-summon --branch main
+  --project-name songdrop --branch main

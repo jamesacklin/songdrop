@@ -1,6 +1,6 @@
 {
-  "name": "Track Summon",
-  "short_name": "Track Summon",
+  "name": "Songdrop",
+  "short_name": "Songdrop",
   "description": "Song-first requests for a self-hosted music library.",
   "start_url": "/",
   "scope": "/",

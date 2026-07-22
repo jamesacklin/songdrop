@@ -1,5 +1,5 @@
 "use strict";
-/* Track Summon PWA — mirrors the iOS front-end. Vanilla JS, no dependencies. */
+/* Songdrop PWA — mirrors the iOS front-end. Vanilla JS, no dependencies. */
 
 // ---------- state ----------
 const LS = window.localStorage;
@@ -143,7 +143,7 @@ let searchResults = [], searchDone = false, searchQuery = "", searching = false;
 function renderSearch() {
   const v = $("#view-search"); v.innerHTML = "";
   v.append(
-    h("div", { class: "nav" }, h("div", { class: "nav-row" }, h("h1", {}, "Track Summon"))),
+    h("div", { class: "nav" }, h("div", { class: "nav-row" }, h("h1", {}, "Songdrop"))),
     h("div", { class: "searchbar" },
       h("input", {
         type: "search", placeholder: "Song, artist…", value: searchQuery,
@@ -457,7 +457,7 @@ function renderSettings() {
   const urlIn = h("input", { class: "v", type: "url", value: baseURL, placeholder: "https://…", autocapitalize: "off", inputmode: "url" });
   const keyIn = h("input", { class: "v", type: "password", value: apiKey, placeholder: "API key" });
   const serverStatusRow = h("div");
-  body.append(h("div", { class: "section-hdr" }, "Track Summon Server"),
+  body.append(h("div", { class: "section-hdr" }, "Songdrop Server"),
     h("div", { class: "group" },
       h("div", { class: "srow full" }, urlIn),
       h("div", { class: "srow full" }, keyIn),
@@ -469,7 +469,7 @@ function renderSettings() {
         btn.textContent = "Test Connection";
       } }, "Test Connection"),
       serverStatusRow),
-    h("div", { class: "section-ftr" }, "The base URL of your Track Summon server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home."));
+    h("div", { class: "section-ftr" }, "The base URL of your Songdrop server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home."));
 
   // slskd + Plex sections (loaded from /api/config)
   const slskdWrap = h("div"), plexWrap = h("div");
@@ -495,7 +495,7 @@ async function testConnection(statusRow) {
   statusRow.innerHTML = "";
   try {
     cfg = await API.getConfig();
-    statusRow.append(statusLine("Track Summon server", true, "connected"));
+    statusRow.append(statusLine("Songdrop server", true, "connected"));
     populateConfigFields();
     cachedStatus = await API.status().catch(() => null);
     if (cachedStatus) {
@@ -504,7 +504,7 @@ async function testConnection(statusRow) {
     }
     renderExtras();
   } catch (e) {
-    statusRow.append(statusLine("Track Summon server", false, e.status === 401 ? "Wrong API key" : e.message));
+    statusRow.append(statusLine("Songdrop server", false, e.status === 401 ? "Wrong API key" : e.message));
   }
 }
 function statusLine(name, ok, detail) {

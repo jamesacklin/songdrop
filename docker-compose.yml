@@ -12,9 +12,9 @@ services:
       - ./data/slskd:/app
       - ./data/downloads:/downloads
 
-  tracksummon:
+  songdrop:
     build: ./server
-    container_name: tracksummon
+    container_name: songdrop
     restart: unless-stopped
     ports:
       - "8585:8585"
@@ -32,7 +32,7 @@ services:
       PLEX_TOKEN: ${PLEX_TOKEN:-}
       PLEX_SECTION: ${PLEX_SECTION:-}
       # Optional: leave unset and the server generates a key on first boot and
-      # prints it to the logs (docker compose logs tracksummon). Set one to pin it.
+      # prints it to the logs (docker compose logs songdrop). Set one to pin it.
       SONGDROP_API_KEY: ${SONGDROP_API_KEY:-}
       NTFY_URL: ${NTFY_URL:-}
       DATABASE_PATH: /data/songdrop.db

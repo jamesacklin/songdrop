@@ -89,7 +89,7 @@ class Worker:
             self.db.update(req["id"], status="failed", error=str(e))
             await notify.send(
                 settings.ntfy_url,
-                "Track Summon: request failed",
+                "Songdrop: request failed",
                 f"{req['artist']} - {req['title']}: {e}",
             )
         except Exception:
@@ -142,7 +142,7 @@ class Worker:
         self.db.update(rid, status="done", detail=detail)
         await notify.send(
             settings.ntfy_url,
-            "Track Summon: track ready" if in_plex or in_plex is None else "Track Summon: needs attention",
+            "Songdrop: track ready" if in_plex or in_plex is None else "Songdrop: needs attention",
             f"{meta.artist} - {meta.title}: {detail}",
         )
 

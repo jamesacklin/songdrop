@@ -1,4 +1,4 @@
-/* Track Summon PWA service worker — caches the app shell, never the API. */
+/* Songdrop PWA service worker — caches the app shell, never the API. */
 const CACHE = "ts-shell-v1";
 const SHELL = [
   "/", "/index.html", "/styles.css", "/app.js", "/manifest.webmanifest",

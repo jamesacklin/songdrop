@@ -1,4 +1,4 @@
-"""Track Summon API: song-first requests for a self-hosted music library."""
+"""Songdrop API: song-first requests for a self-hosted music library."""
 
 import asyncio
 import contextlib
@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
     if _auto_key:
         log.warning(
             "\n" + "=" * 64
-            + "\n  Track Summon access key (auto-generated — set SONGDROP_API_KEY to override):"
+            + "\n  Songdrop access key (auto-generated — set SONGDROP_API_KEY to override):"
             + "\n\n      %s\n"
             + "\n  Enter this as the Access key when connecting the app or PWA.\n"
             + "=" * 64,
@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
         await worker_task
 
 
-app = FastAPI(title="Track Summon", lifespan=lifespan)
+app = FastAPI(title="Songdrop", lifespan=lifespan)
 
 
 async def require_api_key(x_api_key: str | None = Header(default=None)) -> None:

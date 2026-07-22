@@ -1,4 +1,4 @@
-# Track Summon
+# Songdrop
 
 Song-first requests for a self-hosted music library. Shazam a track at a coffee
 shop, open the app, search, tap **Add to Library** — and the next time you're
@@ -7,7 +7,7 @@ home it's in Plex, properly tagged, with album art, in the playlist you asked fo
 The flow (as described in [Joe Karlsson's post](https://www.joekarlsson.com/blog/self-hosted-music-still-sucks-in-2026/)):
 
 ```
-iOS app ──▶ Track Summon server ──▶ slskd (Soulseek) ──▶ tag (mutagen) ──▶ Plex library
+iOS app ──▶ Songdrop server ──▶ slskd (Soulseek) ──▶ tag (mutagen) ──▶ Plex library
    search      request queue        acquisition          metadata +        partial scan +
    (Deezer)                                              album art         playlist add
                                                                               │
@@ -39,19 +39,19 @@ re-queued on startup.
 ## Server setup
 
 The server is published as a multi-arch (amd64 + arm64) image on Docker Hub:
-[`jamesacklin/track-summon`](https://hub.docker.com/r/jamesacklin/track-summon).
+[`jamesacklin/songdrop`](https://hub.docker.com/r/jamesacklin/songdrop).
 
 ```bash
-docker run -d --name track-summon -p 8585:8585 \
-  -v track-summon-data:/data \
+docker run -d --name songdrop -p 8585:8585 \
+  -v songdrop-data:/data \
   -v /srv/plex/music:/music \
   -v /srv/slskd/downloads:/downloads \
   -e SLSKD_URL=http://your-slskd:5030 \
   -e SLSKD_USERNAME=you -e SLSKD_PASSWORD=secret \
   -e PLEX_URL=http://your-plex:32400 -e PLEX_TOKEN=xxxx \
-  jamesacklin/track-summon:latest
+  jamesacklin/songdrop:latest
 
-docker logs track-summon 2>&1 | grep -A2 "access key"   # <- your access key
+docker logs songdrop 2>&1 | grep -A2 "access key"   # <- your access key
 ```
 
 slskd and Plex can also be configured from the app's **Settings** later instead of
@@ -72,14 +72,14 @@ successfully but land somewhere Plex can't see — and if you didn't mount `/mus
 all, they sit in the container's ephemeral filesystem and vanish on the next
 `docker rm`. Mount `/music` to your real Plex music folder.
 
-**Path mapping (`PLEX_LIBRARY_DIR`):** Track Summon and Plex are usually separate
-containers that mount the *same host folder at different container paths*. Track Summon
+**Path mapping (`PLEX_LIBRARY_DIR`):** Songdrop and Plex are usually separate
+containers that mount the *same host folder at different container paths*. Songdrop
 writes to `/music`; if your Plex has that library added as, say, `/media`, set
 `-e PLEX_LIBRARY_DIR=/media` so the scan targets the path Plex actually knows. Example:
 
 ```
 host: /srv/plex/music
-  ├── mounted into Track Summon as /music   (MUSIC_LIBRARY_DIR, default)
+  ├── mounted into Songdrop as /music   (MUSIC_LIBRARY_DIR, default)
   └── mounted into Plex           as /media  → set PLEX_LIBRARY_DIR=/media
 ```
 
@@ -98,27 +98,27 @@ env var to pin your own. Either way, enter it as the **Access key** in the app/P
 ### Other notes
 
 - **slskd**: open `http://your-server:5030`, log in, add your Soulseek credentials. Give
-  Track Summon access with either an API key (Options → Web → Authentication → API keys,
-  set `SLSKD_API_KEY`) or `SLSKD_USERNAME`/`SLSKD_PASSWORD`. Track Summon must be able to
+  Songdrop access with either an API key (Options → Web → Authentication → API keys,
+  set `SLSKD_API_KEY`) or `SLSKD_USERNAME`/`SLSKD_PASSWORD`. Songdrop must be able to
   read slskd's completed-downloads folder at `SLSKD_DOWNLOADS_DIR` (`/downloads`) — mount
   the same host folder into both containers.
 - **Plex token**: any signed-in Plex Web session → open an item → Get Info → View XML →
   copy `X-Plex-Token` from the URL.
 - **YouTube fallback**: on by default; disable with `YTDLP_ENABLED=false` or the toggle in
   Settings → Sources.
-- **Lidarr coexistence**: Track Summon writes normal `Artist/Album/NN - Title.ext` files,
+- **Lidarr coexistence**: Songdrop writes normal `Artist/Album/NN - Title.ext` files,
   so it sits happily next to a Lidarr-managed library.
 
 ### From source (docker compose)
 
-The bundled compose runs slskd + Track Summon together and wires the volumes for you:
+The bundled compose runs slskd + Songdrop together and wires the volumes for you:
 
 ```bash
 cp .env.example .env
 # set MUSIC_LIBRARY_PATH to the HOST path of your Plex music folder;
 # set PLEX_URL / PLEX_TOKEN and slskd creds. SONGDROP_API_KEY is optional.
 docker compose up -d --build
-docker compose logs tracksummon | grep -A2 "access key"
+docker compose logs songdrop | grep -A2 "access key"
 ```
 
 Or without Docker:

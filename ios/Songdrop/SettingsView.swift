@@ -47,11 +47,11 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: Track Summon server
+    // MARK: Songdrop server
 
     private var serverSection: some View {
         Section {
-            TextField("https://tracksummon.example.com", text: $serverURL)
+            TextField("https://songdrop.example.com", text: $serverURL)
                 .keyboardType(.URL)
                 .textContentType(.URL)
                 .autocorrectionDisabled()
@@ -71,15 +71,15 @@ struct SettingsView: View {
             if let serverResult {
                 switch serverResult {
                 case .success:
-                    StatusRow(name: "Track Summon server", ok: true, detail: "connected")
+                    StatusRow(name: "Songdrop server", ok: true, detail: "connected")
                 case .failure(let message):
-                    StatusRow(name: "Track Summon server", ok: false, detail: message)
+                    StatusRow(name: "Songdrop server", ok: false, detail: message)
                 }
             }
         } header: {
-            Text("Track Summon Server")
+            Text("Songdrop Server")
         } footer: {
-            Text("The base URL of your Track Summon server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home. Once connected, slskd and Plex are configured below — no server restart needed.")
+            Text("The base URL of your Songdrop server. Use HTTPS or a VPN (Tailscale/WireGuard) to reach it away from home. Once connected, slskd and Plex are configured below — no server restart needed.")
         }
     }
 

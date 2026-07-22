@@ -4,7 +4,7 @@ database and applied without a restart)."""
 
 import os
 
-# Keys the app may edit via PUT /api/config. Paths and the Track Summon API key
+# Keys the app may edit via PUT /api/config. Paths and the Songdrop API key
 # stay env-only: paths are volume mounts, and the API key is the bootstrap
 # credential the app itself authenticates with.
 RUNTIME_KEYS = (
