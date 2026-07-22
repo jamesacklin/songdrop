@@ -5,27 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Songdrop</title>
 <meta name="description" content="Song-first requests for self-hosted music libraries.">
+<link rel="stylesheet" href="./editorial.css">
 </head>
-<body style="margin:0;">
+<body class="editorial">
 <style>
-  /* A deliberately plain document: system sans, black on white, centered.
-     Single fixed white world by design — no theming, no color, no chrome. */
+  /* Songdrop's centered product-page variant of the shared editorial system. */
   .sd * { box-sizing: border-box; }
   .sd {
-    background: #ffffff;
-    color: #000000;
-    color-scheme: only light;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ed-color-foreground);
+    font-family: var(--ed-font-sans);
     font-size: 19px;
     line-height: 1.5;
-    min-height: 100vh;
     margin: 0;
-    padding: 56px 22px 72px;
+    padding: 20px 0 0;
     text-align: center;
   }
-  .sd .wrap { max-width: 600px; margin: 0 auto; }
+  .sd .wrap { max-width: var(--ed-measure-wide); margin: 0 auto; }
 
-  .sd a { color: #000000; text-decoration: underline; text-underline-offset: 2px; }
+  .sd a { color: var(--ed-color-link); text-decoration: underline; text-underline-offset: 2px; }
 
   .sd .icon { width: 72px; height: 72px; display: block; margin: 0 auto 22px; }
 
@@ -36,7 +33,7 @@
   .sd .sub { font-size: 1.2rem; margin: 0 auto; max-width: none; }
 
   .sd hr {
-    border: 0; border-top: 1px solid #000; width: 100%;
+    border: 0; border-top: 1px solid var(--ed-color-border); width: 100%;
     margin: 44px auto;
   }
 
@@ -48,8 +45,8 @@
     display: block; width: fit-content; max-width: 100%;
     margin: 20px auto 0; padding: 14px 18px;
     text-align: left; overflow-x: auto;
-    border: 1px solid #000;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Code", monospace;
+    border: 1px solid var(--ed-color-border);
+    font-family: var(--ed-font-mono);
     font-size: .8rem; line-height: 1.9;
   }
   .sd pre .c { color: #666; }

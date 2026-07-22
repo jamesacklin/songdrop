@@ -1,0 +1,77 @@
+/*
+ * Vendored core of @ackl/editorial for this static site.
+ * Source package: /Users/jamesacklin/src/editorial-system/editorial.css
+ */
+
+:root {
+  --ed-color-foreground: #111111;
+  --ed-color-background: #ffffff;
+  --ed-color-link: #222222;
+  --ed-color-border: color-mix(in srgb, var(--ed-color-foreground) 24%, transparent);
+  --ed-font-sans: "Arimo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --ed-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  --ed-space: 1.5rem;
+  --ed-space-1: calc(var(--ed-space) / 4);
+  --ed-space-2: calc(var(--ed-space) / 2);
+  --ed-space-3: var(--ed-space);
+  --ed-space-4: calc(var(--ed-space) * 1.5);
+  --ed-space-5: calc(var(--ed-space) * 2);
+  --ed-measure: 42rem;
+  --ed-measure-narrow: 32rem;
+  --ed-measure-wide: 50rem;
+  --ed-page-padding: calc(var(--ed-space) + var(--ed-space-2));
+  --ed-leading: 1.5;
+  --ed-heading-leading: 1.1;
+  --ed-radius: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ed-color-foreground: #eeeeee;
+    --ed-color-background: #111111;
+    --ed-color-link: #dddddd;
+  }
+}
+
+.editorial,
+.editorial *,
+.editorial *::before,
+.editorial *::after {
+  box-sizing: border-box;
+}
+
+.editorial {
+  min-height: 100vh;
+  margin: 0;
+  padding: var(--ed-page-padding);
+  overflow-wrap: break-word;
+  color: var(--ed-color-foreground);
+  background: var(--ed-color-background);
+  font-family: var(--ed-font-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: var(--ed-leading);
+}
+
+.editorial :where(h1, h2, h3, h4, p, figure, blockquote, dl, dd) {
+  margin-block: 0;
+}
+
+.editorial :where(img, picture, svg) {
+  display: block;
+  max-width: 100%;
+}
+
+.editorial a {
+  color: var(--ed-color-link);
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.12em;
+}
+
+@media (max-width: 40rem) {
+  .editorial {
+    padding: var(--ed-space-3) var(--ed-space-2) var(--ed-space-5);
+  }
+}
