@@ -22,3 +22,6 @@ ios/*.certSigningRequest
 ios/*.mobileprovision
 ios/fastlane/report.xml
 ios/fastlane/README.md
+
+# macOS
+.DS_Store

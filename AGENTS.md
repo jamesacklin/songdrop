@@ -5,6 +5,11 @@ self-hosted music library. This file captures the non-obvious build/ship/deploy
 knowledge and gotchas. No secrets live here; see **Secrets** at the bottom for
 where they actually live.
 
+> **📐 Architecture:** before making non-trivial changes, read how the system
+> actually works — the API, the acquisition pipeline, the frontends, and deployment
+> — in [`docs/`](docs/README.md). Start with [`docs/README.md`](docs/README.md).
+> This file is the terse command-level quick-reference; the docs are the deep dive.
+
 ## What it is
 
 Search a track on your phone/PWA → the server acquires it via slskd (Soulseek)
